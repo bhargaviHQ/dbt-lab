@@ -6,6 +6,7 @@ import gradio as gr
 from dotenv import load_dotenv
 
 from modules.model_generator import generate_model_artifacts
+from modules.test_suggester import suggest_tests
 
 
 load_dotenv()
@@ -43,10 +44,23 @@ with gr.Blocks(title="dbt-lab") as demo:
             )
 
         with gr.Tab("dbt Test Suggester"):
-            test_input = gr.Textbox(label="Paste dbt model", lines=12)
-            test_btn = gr.Button("Suggest Tests")
-            test_output = gr.Textbox(label="Suggested tests", lines=10)
-            test_btn.click(fn=not_implemented, inputs=[test_input], outputs=[test_output])
+            gr.Markdown("Paste a dbt model SQL query to generate a ready-to-paste schema.yml test block.")
+            model_sql_input = gr.Code(
+                label="Paste your dbt model SQL",
+                language="sql",
+                lines=14,
+            )
+            suggested_tests_output = gr.Code(
+                label="Suggested dbt Tests (schema.yml)",
+                language="yaml",
+                lines=18,
+            )
+            with gr.Row():
+                suggest_btn = gr.Button("Suggest Tests", variant="primary")
+                clear_btn = gr.Button("Clear")
+
+            suggest_btn.click(fn=suggest_tests, inputs=model_sql_input, outputs=suggested_tests_output)
+            clear_btn.click(fn=lambda: ("", ""), inputs=None, outputs=[model_sql_input, suggested_tests_output])
 
         with gr.Tab("Jinja Explainer"):
             jinja_input = gr.Textbox(label="Paste Jinja or macro code", lines=12)
