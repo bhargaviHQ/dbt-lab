@@ -1,0 +1,5 @@
+anthropic>=0.57.1
+dbt-core>=1.10.0
+gradio>=5.34.0
+pandas>=2.2.2
+python-dotenv>=1.0.1

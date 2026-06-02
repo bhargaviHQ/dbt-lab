@@ -4,19 +4,21 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llm_client import call_claude
+from utils.llm_client import call_claude
 
-_PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "test_suggester.txt"
+PROMPT_FILE = Path(__file__).resolve().parent.parent / "prompts" / "test_suggester.txt"
 
 
 def suggest_tests(model_sql: str) -> str:
-    """Return a schema.yml YAML block with recommended dbt tests for the given model SQL.
+    """Return a schema.yml YAML block with recommended dbt tests for the given model SQL."""
+    cleaned_sql = model_sql.strip()
+    if not cleaned_sql:
+        return "# Please provide SQL input."
 
-    Args:
-        model_sql: Raw SQL text of a dbt model.
-
-    Returns:
-        A ready-to-paste schema.yml YAML string containing suggested dbt tests.
-    """
-    system_prompt = _PROMPT_PATH.read_text(encoding="utf-8")
-    return call_claude(system_prompt=system_prompt, user_prompt=model_sql)
+    try:
+        return call_claude(
+            system_prompt=PROMPT_FILE.read_text(encoding="utf-8").strip(),
+            user_prompt=cleaned_sql,
+        )
+    except Exception as exc:  # noqa: BLE001
+        return f"# Unable to generate tests due to an error: {exc}"
